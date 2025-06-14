@@ -75,7 +75,7 @@ Berikut versi **sederhana** dari bagian **Data Understanding**, tanpa menyertaka
 
 ### **1. Informasi Dataset**
 
-Dataset yang digunakan dalam proyek ini adalah **Pima Indians Diabetes Dataset** dari UCI Machine Learning Repository, yang juga tersedia di Kaggle. Dataset ini berisi informasi medis dari 768 perempuan keturunan suku Pima Indian di Amerika Serikat, dengan usia minimal 21 tahun. Data ini digunakan untuk memprediksi apakah seseorang menderita diabetes atau tidak berdasarkan berbagai indikator kesehatan.
+Dataset yang digunakan dalam proyek ini adalah **Pima Indians Diabetes Dataset** dari UCI Machine Learning Repository, yang juga tersedia di Kaggle. Dataset ini terdiri dari **768 baris** (sampel) dan **9 kolom** (fitur). Dataset ini berisi informasi medis dari perempuan keturunan suku Pima Indian di Amerika Serikat, dengan usia minimal 21 tahun. Tujuan penggunaan data ini adalah untuk memprediksi apakah seseorang menderita diabetes berdasarkan berbagai indikator kesehatan.
 
 📎 Sumber data: [https://www.kaggle.com/datasets/uciml/pima-indians-diabetes-database](https://www.kaggle.com/datasets/uciml/pima-indians-diabetes-database)
 
