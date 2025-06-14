@@ -97,7 +97,12 @@ Berikut adalah variabel-variabel yang terdapat pada dataset:
 
 ---
 
-### **3. Exploratory Data Analysis (EDA)**
+### **3. Kualitas Data**
+Berdasarkan pemeriksaan awal terhadap dataset, tidak ditemukan missing value maupun nilai nol pada seluruh kolom numerik. Oleh karena itu, tidak diperlukan proses imputasi atau penanganan khusus terkait kualitas data pada tahap awal. Adapun data masih banyak yang berada di luar jangkauan atau merupakan nilai Outlier, dengan demikian data akan dilakukan Winsorizing di tahap Data Preperation.
+
+---
+
+### **4. Exploratory Data Analysis (EDA)**
 
 Untuk memahami karakteristik data, dilakukan analisis awal berupa visualisasi distribusi masing-masing fitur berdasarkan status diabetes (Outcome). Hasilnya menunjukkan bahwa:
 
@@ -141,6 +146,8 @@ Dataset ini memiliki ketidakseimbangan kelas, di mana jumlah pasien non-diabetes
 Dilakukan teknik reduksi dimensi menggunakan **PCA** untuk mereduksi kompleksitas fitur, menghilangkan multikolinearitas, dan mempercepat waktu pelatihan model. Komponen utama yang dipilih mampu menjelaskan sebagian besar variasi data.
 
 🔹 **Tujuan**: Menyederhanakan data tanpa kehilangan informasi penting dan mempercepat proses pelatihan model.
+
+Akan tetapi PCA tidak dipakai dikarenakan pada tahap Modeling menggunakan PCA memberikan hasil yang tidak lebih baik dibandiingkan dengan Model tanpa PCA.
 
 ---
 
@@ -205,13 +212,32 @@ Dari hasil evaluasi, **Random Forest** menunjukkan performa terbaik secara konsi
 
 ---
 
-### **4. Improvement Model**
+### **4. Fine-Tuning dan Model Akhir**
 
-Model Random Forest kemudian di-*improve* menggunakan teknik **Grid Search** untuk melakukan **hyperparameter tuning** terhadap parameter seperti `max_depth`, `min_samples_split`, dan `n_estimators`.
+Setelah model Random Forest dipilih sebagai model utama, dilakukan proses **hyperparameter tuning** menggunakan **GridSearchCV** dengan 5-fold cross-validation. Proses ini mengevaluasi kombinasi beberapa parameter penting untuk menemukan konfigurasi terbaik yang memberikan akurasi dan generalisasi optimal.
 
-🔍 Tujuan dari proses ini adalah untuk menemukan kombinasi parameter terbaik agar akurasi dan generalisasi model meningkat.
+Parameter yang ditelusuri antara lain:
 
----
+* `n_estimators`: \[100, 200]
+* `max_depth`: \[None, 10, 20]
+* `min_samples_split`: \[2, 5]
+* `min_samples_leaf`: \[1, 2]
+* `bootstrap`: \[True, False]
+
+Hasil pencarian menunjukkan bahwa kombinasi terbaik diperoleh pada konfigurasi berikut:
+
+```python
+RandomForestClassifier(
+    n_estimators=100,
+    max_depth=None,
+    min_samples_split=5,
+    min_samples_leaf=1,
+    bootstrap=True,
+    random_state=42
+)
+```
+
+Model ini kemudian digunakan sebagai **model akhir**, yang selanjutnya dilatih ulang dengan seluruh data latih dan diuji pada data uji. Fine-tuning ini berhasil meningkatkan akurasi model serta menghasilkan metrik evaluasi (seperti recall dan F1-score) yang lebih seimbang antar kelas, khususnya dalam mendeteksi pasien dengan diabetes (kelas 1).
 
 ### **Kesimpulan**
 
@@ -221,11 +247,9 @@ Dengan melakukan perbandingan beberapa model dan melakukan tuning pada model ter
 
 Untuk mengevaluasi performa model klasifikasi dalam memprediksi diabetes, digunakan beberapa metrik evaluasi yang relevan, yaitu:
 
----
-
 ### **1. Accuracy (Akurasi)**
 
-Akurasi mengukur seberapa banyak prediksi yang benar dari seluruh prediksi yang dilakukan.
+Akurasi mengukur proporsi prediksi yang benar dibandingkan seluruh prediksi yang dilakukan oleh model.
 
 📌 **Formula**:
 
@@ -234,13 +258,13 @@ $$
 $$
 
 📈 **Hasil**:
-Model mencapai **akurasi sebesar 81%**, yang menunjukkan bahwa 81% prediksi model terhadap data uji adalah benar.
+Model mencapai **akurasi sebesar 80%**, yang berarti bahwa 80% prediksi model terhadap data uji adalah tepat, mencakup baik prediksi positif maupun negatif.
 
 ---
 
 ### **2. Precision**
 
-Precision mengukur seberapa banyak prediksi positif yang benar-benar positif. Ini penting dalam konteks medis agar tidak terlalu banyak pasien yang sehat diklasifikasikan sebagai sakit.
+Precision adalah rasio dari prediksi positif yang benar-benar positif. Dalam konteks medis seperti deteksi diabetes, precision penting agar tidak banyak orang sehat yang salah didiagnosis sebagai penderita diabetes.
 
 📌 **Formula**:
 
@@ -250,14 +274,14 @@ $$
 
 📈 **Hasil**:
 
-* Precision kelas 0 (Non-Diabetes): **0.83**
-* Precision kelas 1 (Diabetes): **0.79**
+* Precision kelas 0 (Non-Diabetes): **0.82**
+* Precision kelas 1 (Diabetes): **0.78**
 
 ---
 
 ### **3. Recall (Sensitivity / True Positive Rate)**
 
-Recall mengukur seberapa banyak kasus positif yang berhasil terdeteksi oleh model. Dalam konteks diabetes, recall penting karena menyangkut deteksi pasien yang benar-benar mengidap diabetes.
+Recall menunjukkan seberapa baik model dalam menemukan seluruh kasus positif yang sebenarnya. Untuk deteksi diabetes, recall tinggi artinya sedikit pasien yang terlewatkan.
 
 📌 **Formula**:
 
@@ -267,14 +291,14 @@ $$
 
 📈 **Hasil**:
 
-* Recall kelas 0: **0.77**
+* Recall kelas 0: **0.76**
 * Recall kelas 1: **0.84**
 
 ---
 
 ### **4. F1-Score**
 
-F1-Score adalah harmonic mean antara precision dan recall, digunakan ketika kita ingin mempertimbangkan keduanya secara seimbang.
+F1-Score adalah rata-rata harmonis antara precision dan recall. Cocok digunakan ketika kita ingin menjaga keseimbangan antara keduanya, seperti dalam deteksi penyakit yang sensitif terhadap kesalahan prediksi.
 
 📌 **Formula**:
 
@@ -284,10 +308,8 @@ $$
 
 📈 **Hasil**:
 
-* F1 kelas 0: **0.80**
+* F1 kelas 0: **0.79**
 * F1 kelas 1: **0.81**
-
----
 
 ### **5. ROC AUC Score**
 ![ROC AUC Score](ROC_Curve.png)
@@ -304,12 +326,12 @@ Berdasarkan confusion matrix:
 
 |                         | Predicted Non-Diabetes | Predicted Diabetes |
 | ----------------------- | ---------------------- | ------------------ |
-| **Actual Non-Diabetes** | 76                     | 23                 |
+| **Actual Non-Diabetes** | 75                     | 24                 |
 | **Actual Diabetes**     | 16                     | 85                 |
 
 * **True Positives (TP)**: 85
-* **True Negatives (TN)**: 76
-* **False Positives (FP)**: 23
+* **True Negatives (TN)**: 75
+* **False Positives (FP)**: 24
 * **False Negatives (FN)**: 16
 
 Confusion matrix memberikan gambaran nyata tentang kesalahan dan keberhasilan model dalam klasifikasi dua kelas.
@@ -318,4 +340,4 @@ Confusion matrix memberikan gambaran nyata tentang kesalahan dan keberhasilan mo
 
 ### **Kesimpulan**
 
-Model Random Forest yang digunakan mampu mencapai performa yang sangat baik, dengan nilai **akurasi 81%** dan **ROC AUC 0.8872**. Ini menunjukkan bahwa model cukup andal dalam memprediksi diabetes. Selain itu, nilai recall yang tinggi untuk kelas diabetes (0.84) menunjukkan bahwa model cukup sensitif dalam mendeteksi pasien yang benar-benar mengidap penyakit ini, yang sangat penting dalam konteks medis.
+Model Random Forest yang digunakan mampu mencapai performa yang sangat baik, dengan nilai **akurasi 80%** dan **ROC AUC 0.8710**. Ini menunjukkan bahwa model cukup andal dalam memprediksi diabetes. Selain itu, nilai recall yang tinggi untuk kelas diabetes (0.84) menunjukkan bahwa model cukup sensitif dalam mendeteksi pasien yang benar-benar mengidap penyakit ini, yang sangat penting dalam konteks medis.
